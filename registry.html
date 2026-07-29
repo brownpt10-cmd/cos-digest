@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dark Skies Consulting — Registry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+  :root {
+    /* Calendar-matched palette (2026-07-29): dark slate FRAME, light content
+       CARDS, dark ink text — so nothing important is white-on-black (Pat can't
+       read light-on-dark comfortably). Mirrors build_calendar.py's oklch scheme.
+       Frame-only text (logo, footer) uses the --frame-* vars; everything inside a
+       .panel / .reg-card / landing card uses the dark --text/--offwhite/--subtext
+       inks below. */
+    --ink: oklch(0.30 0.018 255);          /* page frame (slate) */
+    --frame-fg: oklch(0.96 0.006 255);     /* light text on the frame */
+    --frame-fg-dim: oklch(0.80 0.010 255); /* dimmer light text on the frame */
+    --offwhite: oklch(0.23 0.013 260);     /* darkest ink — headings/strong on cards */
+    --text: oklch(0.28 0.012 260);         /* body copy on cards */
+    --subtext: oklch(0.47 0.012 258);      /* muted ink on cards */
+    --accent: oklch(0.50 0.15 255);        /* blue accent, readable on light */
+    --accent-dim: oklch(0.72 0.07 255);    /* light-blue tint: rings, chip borders */
+    --panel-bg: oklch(0.91 0.004 255);     /* light content card */
+    --panel-border: oklch(0.80 0.008 255); /* card border / table rules */
+    --sans: 'Titillium Web', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--ink); }
+  body {
+    margin: 0; font-family: var(--sans); color: var(--frame-fg); line-height: 1.6;
+    position: relative; min-height: 100vh; overflow-x: hidden;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      radial-gradient(1px 1px at 8% 12%, rgba(245,246,247,.55), transparent 60%),
+      radial-gradient(1px 1px at 22% 68%, rgba(245,246,247,.35), transparent 60%),
+      radial-gradient(1.5px 1.5px at 38% 30%, rgba(245,246,247,.5), transparent 60%),
+      radial-gradient(1px 1px at 54% 82%, rgba(245,246,247,.3), transparent 60%),
+      radial-gradient(1px 1px at 67% 18%, rgba(245,246,247,.45), transparent 60%),
+      radial-gradient(1.5px 1.5px at 81% 55%, rgba(245,246,247,.4), transparent 60%),
+      radial-gradient(1px 1px at 93% 88%, rgba(245,246,247,.3), transparent 60%),
+      radial-gradient(1px 1px at 15% 92%, rgba(245,246,247,.35), transparent 60%),
+      radial-gradient(1px 1px at 74% 40%, rgba(245,246,247,.25), transparent 60%);
+    background-repeat: repeat; background-size: 480px 480px;
+  }
+  main, .topbar { position: relative; z-index: 1; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 28px; border-bottom: 1px solid var(--panel-border);
+    position: sticky; top: 0; background: oklch(0.30 0.018 255 / 0.90); backdrop-filter: blur(8px);
+    z-index: 20;
+  }
+  .topbar-logo-link { text-decoration: none; display: inline-flex; align-items: center; }
+
+  /* Logo lockup — rings behind stacked initials/divider/fullname, per the brand
+     spec. --topbar sizes the whole composition to ~50% of the old separate
+     hero banner (rings were 380px there) so it fits compactly upper-left. */
+  .dsc-logo { position: relative; display: flex; flex-direction: column; align-items: center; }
+  .dsc-rings { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -54%);
+    width: 380px; max-width: 90vw; height: auto; }
+  .dsc-rings ellipse { fill: none; stroke: var(--accent-dim); }
+  .dsc-rings .ring-outer { stroke-width: 1.5; opacity: 0.9; }
+  .dsc-rings .ring-inner { stroke-width: 1; opacity: 0.55; }
+  .dsc-wordmark { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+  .dsc-initials { font-weight: 600; font-size: 64px; letter-spacing: .08em; color: var(--frame-fg); line-height: 1; }
+  .dsc-divider { width: 220px; max-width: 60vw; height: 2px; background: var(--accent); margin: 16px 0; }
+  .dsc-fullname { font-weight: 500; font-size: 14px; letter-spacing: .42em; text-transform: uppercase;
+    color: var(--frame-fg-dim); text-align: center; }
+
+  .dsc-logo--topbar { width: 190px; padding: 14px 0 10px; }
+  .dsc-logo--topbar .dsc-rings { width: 190px; }
+  .dsc-logo--topbar .dsc-initials { font-size: 32px; }
+  .dsc-logo--topbar .dsc-divider { width: 110px; height: 1px; margin: 8px 0; }
+  .dsc-logo--topbar .dsc-fullname { font-size: 9px; letter-spacing: .3em; }
+
+  nav.tabs { display: flex; gap: 4px; background: var(--panel-bg); border: 1px solid var(--panel-border);
+    border-radius: 999px; padding: 4px; }
+  nav.tabs a {
+    background: none; border: none; color: var(--subtext); font-family: var(--sans);
+    padding: 8px 18px; border-radius: 999px; cursor: pointer; font-size: 12px;
+    letter-spacing: .12em; text-transform: uppercase; font-weight: 600;
+    text-decoration: none; display: inline-block;
+  }
+  nav.tabs a.active { background: var(--accent); color: var(--frame-fg); }
+  nav.tabs a:not(.active):hover { color: var(--accent); }
+
+  main { max-width: 1400px; margin: 0 auto; padding: 22px 24px 60px; }
+
+  /* Mobile-first: single stacked column in original document order. */
+  .columns-desktop { display: none; }
+  .stack-mobile { display: block; }
+
+  /* Desktop: explicit 3-column layout, panels pre-distributed at build time
+     (greedy height balance) rather than relying on CSS column-count, which
+     forces one column to run long when a single panel is much taller than
+     the rest and leaves the other columns with a big blank gap. */
+  @media (min-width: 1080px) {
+    .stack-mobile { display: none; }
+    .columns-desktop { display: flex; gap: 22px; align-items: flex-start; }
+    .columns-desktop .col { flex: 1 1 0; min-width: 0; }
+  }
+
+  .panel {
+    background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 14px;
+    padding: 26px 28px; margin-bottom: 22px; position: relative; overflow: hidden;
+    color: var(--text); box-shadow: 0 2px 10px oklch(0.18 0.02 255 / 0.30);
+  }
+  .panel::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent 70%);
+  }
+
+  h1 { font-size: 15px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; margin: 0; color: var(--offwhite); }
+  h2 {
+    font-size: 13px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--offwhite); margin: 0 0 18px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--panel-border); display: flex; align-items: center; gap: 10px;
+  }
+  .panel:not(:first-child) h2 { margin-top: 0; }
+  h3 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 18px 0 8px; }
+  p { color: var(--text); font-size: 14.5px; font-weight: 400; line-height: 1.65; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--offwhite); font-weight: 600; }
+  em { color: var(--subtext); font-style: italic; }
+  a { color: var(--accent); }
+
+  .table-wrap { overflow-x: auto; margin: 4px 0 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--panel-border); }
+  th { color: var(--subtext); font-weight: 600; text-transform: uppercase; font-size: 10px;
+    letter-spacing: .1em; font-family: var(--mono); }
+  td { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: oklch(0.86 0.008 255); }
+
+  code { background: oklch(0.85 0.010 255); color: var(--text); padding: 2px 6px; border-radius: 4px;
+    font-family: var(--mono); font-size: 90%; }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 10px; font-size: 14.5px; font-weight: 400; line-height: 1.65; color: var(--text); }
+  li:last-child { margin-bottom: 0; }
+  hr { display: none; }
+
+  .status { display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-right: 6px; }
+  .status--active { color: var(--accent); background: rgba(110, 150, 200, 0.14); border: 1px solid var(--accent-dim); }
+  .status--dormant { color: var(--subtext); background: rgba(185,188,194,0.08); border: 1px solid var(--panel-border); }
+  .status--archived { color: #6a6d74; background: rgba(106,109,116,0.08); border: 1px solid var(--panel-border); }
+
+  /* Registry cards — category panels stack full width; cards flow responsively inside. */
+  .reg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  .reg-card { border: 1px solid var(--panel-border); border-radius: 12px; padding: 14px 15px;
+    background: oklch(0.96 0.003 255); color: var(--text); display: flex; flex-direction: column; }
+  .reg-card--ref { border-style: dashed; }
+  .reg-card--paused { opacity: 0.68; }
+  .reg-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+  .reg-card-title { font-weight: 600; font-size: 14px; color: var(--offwhite); line-height: 1.3; }
+  .reg-sys { font-family: var(--mono); font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--subtext); border: 1px solid var(--panel-border); border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+  .reg-desc { font-size: 13px; color: var(--text); opacity: 0.78; line-height: 1.5; margin-bottom: 12px; flex: 1; }
+  .reg-cad { align-self: flex-start; font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 999px; }
+  .reg-cad--scheduled { color: var(--accent); background: rgba(110,150,200,0.14); border: 1px solid var(--accent-dim); }
+  .reg-cad--asneeded { color: var(--subtext); background: rgba(245,246,247,0.05); border: 1px solid var(--panel-border); }
+  .reg-cad--paused { color: var(--subtext); background: rgba(245,246,247,0.06); border: 1px solid var(--panel-border); }
+  .reg-cad--planned { color: var(--subtext); background: none; border: 1px dashed var(--accent-dim); }
+
+  .footer-note { color: var(--frame-fg-dim); font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
+    margin-top: 30px; text-align: center; opacity: .7; }
+
+  /* Phone-specific tightening (Digest is the page most often checked on a phone). */
+  @media (max-width: 600px) {
+    .dsc-logo--topbar { width: 120px; padding: 8px 0; }
+    .dsc-logo--topbar .dsc-rings { width: 120px; }
+    .dsc-logo--topbar .dsc-initials { font-size: 22px; }
+    .dsc-logo--topbar .dsc-divider { display: none; }
+    .dsc-logo--topbar .dsc-fullname { display: none; }
+    .panel { padding: 18px 16px; margin-bottom: 16px; }
+    main { padding: 14px 14px 40px; }
+    h2 { font-size: 12px; letter-spacing: .14em; }
+    table, th, td { font-size: 11.5px; }
+    th, td { padding: 8px 8px; }
+    nav.tabs { gap: 2px; padding: 3px; }
+    nav.tabs a { padding: 7px 10px; font-size: 10px; letter-spacing: .06em; white-space: nowrap; }
+  }
+
+  .landing-links { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin-top: 30px; }
+  .landing-links a {
+    display: block; min-width: 200px; text-align: center; text-decoration: none;
+    background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 14px;
+    padding: 22px 30px; color: var(--offwhite); font-family: var(--mono); font-size: 12px;
+    letter-spacing: .14em; text-transform: uppercase; font-weight: 600; position: relative; overflow: hidden;
+  }
+  .landing-links a::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent 70%);
+  }
+  .landing-links a small { display: block; margin-top: 6px; color: var(--subtext); font-size: 10px; letter-spacing: .08em; text-transform: none; font-weight: 400; }
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="topbar-logo-link" href="dashboard.html"><div class="dsc-logo dsc-logo--topbar">
+  
+<svg class="dsc-rings" viewBox="0 0 400 200" aria-hidden="true">
+  <ellipse cx="200" cy="100" rx="162" ry="60" transform="rotate(-18 200 100)" class="ring-outer"/>
+  <ellipse cx="200" cy="100" rx="132" ry="45" transform="rotate(-18 200 100)" class="ring-inner"/>
+</svg>
+
+  <div class="dsc-wordmark">
+    <span class="dsc-initials">DSC</span>
+    <span class="dsc-divider"></span>
+    <span class="dsc-fullname">Dark Skies Consulting</span>
+  </div>
+</div></a>
+  <nav class="tabs">
+    <a href="registry.html" class="active">Registry</a>
+    <a href="digest.html" class="">Digest</a>
+    <a href="stock-price.html" class="">Stock-Price</a>
+    <a href="calendar.html">Calendar</a>
+  </nav>
+</header>
+
+<main>
+  <div class="reg-stack"><div class="panel"><h1>Project Registry</h1>
+<p>The &quot;what exists&quot; map of Pat&#x27;s Claude ecosystem — every runnable task, project, and supporting doc across <strong>Cowork</strong>, <strong>Claude Code</strong>, and <strong>Claude Projects (Chat)</strong>, grouped by life category. Pair it with <code>DASHBOARD.md</code> (the &quot;what needs attention today&quot; digest).</p>
+<p><strong>Why this is hand-maintained:</strong> no single Claude view spans Chat + Cowork + Code today, so nothing can enumerate this automatically. Source of truth is <code>InvestmentTracker/Claude Registry.xlsx</code> — edit that, then run &quot;update the registry&quot; to re-render this file and the cards.</p>
+<p><strong>System tags:</strong> <code>Cowork</code> (scheduled/manual Cowork run) · <code>Code</code> (Claude Code project) · <code>Project</code> (Claude Project + skills, run from Chat) · <code>Reference</code> (a doc that feeds other tasks, not a runnable itself).</p>
+<p><strong>Update cadence:</strong> manual. Running &quot;update the registry&quot; also rebuilds the HTML (<code>python3 build_dashboard.py</code>) so the rendered page stays in sync.</p>
+<p><strong>Last updated:</strong> 2026-07-29 · <strong>Source:</strong> <code>InvestmentTracker/Claude Registry.xlsx</code> (sheet unchanged since 2026-07-11; this refresh reflects what&#x27;s been built on top of it since — see Notes)</p>
+<hr></div><div class="panel"><h2>Finance</h2><div class="reg-grid"><div class="reg-card" title="Daily Market/"><div class="reg-card-top"><span class="reg-card-title">Daily Market Briefing</span><span class="reg-sys">Cowork</span></div><div class="reg-desc">Daily look at market macros and news</div><span class="reg-cad reg-cad--scheduled">Daily 7:00 AM</span></div><div class="reg-card" title="Daily Market/"><div class="reg-card-top"><span class="reg-card-title">Daily ROTH IRA Fund Analysis</span><span class="reg-sys">Cowork</span></div><div class="reg-desc">Analyze the funds in the Roth IRA</div><span class="reg-cad reg-cad--scheduled">Daily</span></div><div class="reg-card" title="Gmail draft"><div class="reg-card-top"><span class="reg-card-title">Daily Portfolio Email</span><span class="reg-sys">Cowork</span></div><div class="reg-desc">Brief portfolio look, created as a Gmail draft</div><span class="reg-cad reg-cad--scheduled">Daily 7:00 AM</span></div><div class="reg-card" title="InvestmentTracker/Weekly Portfolio Analysis/"><div class="reg-card-top"><span class="reg-card-title">Weekly Portfolio Analysis</span><span class="reg-sys">Cowork</span></div><div class="reg-desc">Detailed investment-portfolio report (.docx)</div><span class="reg-cad reg-cad--scheduled">Sat 12:00 PM</span></div><div class="reg-card" title="InvestmentTracker/"><div class="reg-card-top"><span class="reg-card-title">Portfolio Returns (activities parsing)</span><span class="reg-sys">Cowork</span></div><div class="reg-desc">Returns computed from downloaded activity files</div><span class="reg-cad reg-cad--scheduled">Monthly, as needed</span></div><div class="reg-card" title="Run process command in Developer folder"><div class="reg-card-top"><span class="reg-card-title">Personal Investment Dashboard</span><span class="reg-sys">Code</span></div><div class="reg-desc">The full investment-portfolio dashboard</div><span class="reg-cad reg-cad--scheduled">Weekly dump / as needed</span></div><div class="reg-card" title="Portfolio2 on MyDrive/Portfolio"><div class="reg-card-top"><span class="reg-card-title">Google Sheets Portfolio</span><span class="reg-sys">Cowork</span></div><div class="reg-desc">Auto-update Google Sheets from local Excel</div><span class="reg-cad reg-cad--scheduled">Sat weekly</span></div><div class="reg-card" title="Add ticker to Prices.xlsx, run process command (InvestmentTracker/)"><div class="reg-card-top"><span class="reg-card-title">Prices</span><span class="reg-sys">Code</span></div><div class="reg-desc">Price updater built inside Personal Investment</div><span class="reg-cad reg-cad--asneeded">As needed</span></div><div class="reg-card" title="Investing Project/"><div class="reg-card-top"><span class="reg-card-title">Stock-Price &amp; -Trim Skills</span><span class="reg-sys">Project</span></div><div class="reg-desc">Rules-based stock/ETF position analysis, taxable + Roth</div><span class="reg-cad reg-cad--asneeded">As needed (ticker + shares + $)</span></div><div class="reg-card reg-card--paused" title="Gmail draft"><div class="reg-card-top"><span class="reg-card-title">Daily Small Cap Screen</span><span class="reg-sys">Cowork</span></div><div class="reg-desc">Early small-cap catalyst scan, 5:00 AM MT</div><span class="reg-cad reg-cad--paused">Paused</span></div><div class="reg-card reg-card--ref" title="InvestmentTracker/Investor Profile.md"><div class="reg-card-top"><span class="reg-card-title">Investor Profile</span><span class="reg-sys">Reference</span></div><div class="reg-desc">Input to daily &amp; weekly analysis</div><span class="reg-cad reg-cad--asneeded">As needed</span></div><div class="reg-card reg-card--ref" title="InvestmentTracker/Advisory Instructions.md"><div class="reg-card-top"><span class="reg-card-title">Advisory Instructions</span><span class="reg-sys">Reference</span></div><div class="reg-desc">Input to daily &amp; weekly analysis</div><span class="reg-cad reg-cad--asneeded">As needed</span></div><div class="reg-card reg-card--ref" title="InvestmentTracker/Weekly Portfolio Analysis/Roth_IRA_Sleeve_Backtest_Request.md"><div class="reg-card-top"><span class="reg-card-title">Roth IRA Sleeve Backtest Request</span><span class="reg-sys">Reference</span></div><div class="reg-desc">Input to daily &amp; weekly analysis</div><span class="reg-cad reg-cad--asneeded">As needed</span></div></div></div><div class="panel"><h2>Entertainment</h2><div class="reg-grid"><div class="reg-card" title="Book Tracker/"><div class="reg-card-top"><span class="reg-card-title">Book Monthly</span><span class="reg-sys">Cowork</span></div><div class="reg-desc">Monthly reading-list creation</div><span class="reg-cad reg-cad--scheduled">Monthly (1st)</span></div><div class="reg-card" title="TVShowsandMovies/"><div class="reg-card-top"><span class="reg-card-title">TV Shows and Movies</span><span class="reg-sys">Cowork</span></div><div class="reg-desc">TV &amp; movie tracker dashboard (OneDrive only)</div><span class="reg-cad reg-cad--scheduled">Sat weekly</span></div><div class="reg-card" title="F1/"><div class="reg-card-top"><span class="reg-card-title">F1 Analysis</span><span class="reg-sys">Project</span></div><div class="reg-desc">Analysis by race, session, and driver</div><span class="reg-cad reg-cad--asneeded">As needed</span></div></div></div><div class="panel"><h2>Caregiver</h2><div class="reg-grid"><div class="reg-card" title="Weekly Events/"><div class="reg-card-top"><span class="reg-card-title">Colorado Springs Events</span><span class="reg-sys">Cowork</span></div><div class="reg-desc">Pulls together events around Colorado Springs</div><span class="reg-cad reg-cad--scheduled">Sun weekly</span></div></div></div><div class="panel"><h2>Travel</h2><div class="reg-grid"><div class="reg-card" title="—"><div class="reg-card-top"><span class="reg-card-title">Travel Planning</span><span class="reg-sys">—</span></div><div class="reg-desc">F1 Las Vegas GP (Nov 2026) &amp; Oktoberfest (Sep 2026) — to be built into a task</div><span class="reg-cad reg-cad--planned">Planned</span></div></div></div><div class="panel"><h2>Infrastructure</h2><div class="reg-grid"><div class="reg-card" title="Cos Dashboard/dashboard.html"><div class="reg-card-top"><span class="reg-card-title">Chief of Staff Dashboard</span><span class="reg-sys">Code</span></div><div class="reg-desc">Personal-assistant dashboard — now spans <strong>Digest</strong>, <strong>Registry</strong>, <strong>Stock-Price</strong>, and the <strong>Weekly Calendar</strong> pages. Digest + Calendar also publish AES-encrypted to public GitHub Pages (<code>cos-digest</code>, <code>cos-calendar</code>) for phone/iPad viewing.</div><span class="reg-cad reg-cad--scheduled">Daily / on trigger</span></div></div></div><div class="panel"><h2>Relationships (loose — see Notes)</h2>
+<p>Not a strict dependency graph, just the links that actually exist:</p>
+<ul>
+<li><strong>Shared inputs:</strong> <code>Investor Profile</code>, <code>Advisory Instructions</code>, and `Roth IRA Sleeve</li>
+</ul>
+<p>Backtest Request` all feed the Daily Market Briefing, Daily ROTH IRA Fund Analysis, Daily Portfolio Email, and Weekly Portfolio Analysis.</p>
+<ul>
+<li><strong>Code chain:</strong> <code>Prices</code> is built inside <code>Personal Investment Dashboard</code> and updates the</li>
+</ul>
+<p>prices it consumes.</p>
+<ul>
+<li><strong>Shared output folder:</strong> Daily Market Briefing and Daily ROTH IRA Fund Analysis both</li>
+</ul>
+<p>write to <code>Daily Market/</code>; Weekly Portfolio Analysis reads the reference docs and writes to <code>Weekly Portfolio Analysis/</code>.</p></div><div class="panel"><h2>Notes</h2>
+<ul>
+<li>Rebuilt 2026-07-11 from <code>Claude Registry.xlsx</code>. This is a <strong>task/system</strong> registry (what</li>
+</ul>
+<p>runs where), which is a different cut from the earlier draft that mixed in portfolio <em>strategies</em> (dividend sleeve, Roth conversion ladder, 8-ETF thematic allocation, Roth valuation dashboard), the Pensador Drive rental, and Desktop Commander setup. Those weren&#x27;t in the spreadsheet, so they&#x27;re not carried here — flag any you want re-added.</p>
+<ul>
+<li><strong>Travel Planning</strong> was kept (per Pat, 2026-07-11) and added under its own <code>Travel</code></li>
+</ul>
+<p>category with a <code>Planned</code> cadence — it&#x27;s on the list but not yet a real Claude task. When it becomes one, set its System (Cowork/Code/Project) and cadence.</p>
+<ul>
+<li>Minor cleanup from the source sheet: fixed the filename to <code>Advisory Instructions.md</code></li>
+</ul>
+<p>(sheet had it singular), normalized refresh cadences to short labels, and shortened the long absolute paths to workspace-relative ones. The <code>Location</code> values are otherwise faithful to the sheet.</p>
+<ul>
+<li>The old &quot;Scheduled Tasks Checklist (none yet)&quot; placeholder is gone — the real scheduled</li>
+</ul>
+<p>tasks are the <code>Cowork</code>-tagged rows above.</p>
+<ul>
+<li><strong>Refresh 2026-07-29 (built-on-top, not in the sheet):</strong> the Chief of Staff Dashboard</li>
+</ul>
+<p>has grown since the 7/11 sheet snapshot — it now includes the <strong>Weekly Calendar</strong> (Phase 1 done 2026-07-17; <code>build_calendar.py</code> → <code>calendar.html</code> from <code>SCHEDULE_DATA.json</code>, own IBM Plex identity) and an <strong>encrypted-publish pipeline</strong> (<code>~/GitHubSync/github_sync.sh</code> → StatiCrypt → public <code>cos-digest</code> / <code>cos-calendar</code> Pages). These aren&#x27;t rows in <code>Claude Registry.xlsx</code>; add them there if you want them tracked as first-class items.</p>
+<ul>
+<li><strong>Watch item (2026-07-29):</strong> the <strong>Daily Portfolio Email</strong> Cowork task looks stalled —</li>
+</ul>
+<p><code>InvestmentTracker/Daily_Brief_Digest.md</code> is still dated 7/24 (no Mon/Tue/Wed run), so the digest&#x27;s Stock Signals block is running on 5-day-old data. Check whether that scheduled task is stuck.</p></div></div>
+  <div class="footer-note">Rendered 2026-07-29 10:53 &middot; read-only view &mdash; nothing here triggers a script. Run "update the registry" / "run the morning digest" / "build the HTML dashboard" in Claude Code to refresh.</div>
+</main>
+</body>
+</html>
