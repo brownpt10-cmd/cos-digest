@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dark Skies Consulting — Stock-Price</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+  :root {
+    /* Calendar-matched palette (2026-07-29): dark slate FRAME, light content
+       CARDS, dark ink text — so nothing important is white-on-black (Pat can't
+       read light-on-dark comfortably). Mirrors build_calendar.py's oklch scheme.
+       Frame-only text (logo, footer) uses the --frame-* vars; everything inside a
+       .panel / .reg-card / landing card uses the dark --text/--offwhite/--subtext
+       inks below. */
+    --ink: oklch(0.30 0.018 255);          /* page frame (slate) */
+    --frame-fg: oklch(0.96 0.006 255);     /* light text on the frame */
+    --frame-fg-dim: oklch(0.80 0.010 255); /* dimmer light text on the frame */
+    --offwhite: oklch(0.23 0.013 260);     /* darkest ink — headings/strong on cards */
+    --text: oklch(0.28 0.012 260);         /* body copy on cards */
+    --subtext: oklch(0.47 0.012 258);      /* muted ink on cards */
+    --accent: oklch(0.50 0.15 255);        /* blue accent, readable on light */
+    --accent-dim: oklch(0.72 0.07 255);    /* light-blue tint: rings, chip borders */
+    --panel-bg: oklch(0.91 0.004 255);     /* light content card */
+    --panel-border: oklch(0.80 0.008 255); /* card border / table rules */
+    --sans: 'Titillium Web', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--ink); }
+  body {
+    margin: 0; font-family: var(--sans); color: var(--frame-fg); line-height: 1.6;
+    position: relative; min-height: 100vh; overflow-x: hidden;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      radial-gradient(1px 1px at 8% 12%, rgba(245,246,247,.55), transparent 60%),
+      radial-gradient(1px 1px at 22% 68%, rgba(245,246,247,.35), transparent 60%),
+      radial-gradient(1.5px 1.5px at 38% 30%, rgba(245,246,247,.5), transparent 60%),
+      radial-gradient(1px 1px at 54% 82%, rgba(245,246,247,.3), transparent 60%),
+      radial-gradient(1px 1px at 67% 18%, rgba(245,246,247,.45), transparent 60%),
+      radial-gradient(1.5px 1.5px at 81% 55%, rgba(245,246,247,.4), transparent 60%),
+      radial-gradient(1px 1px at 93% 88%, rgba(245,246,247,.3), transparent 60%),
+      radial-gradient(1px 1px at 15% 92%, rgba(245,246,247,.35), transparent 60%),
+      radial-gradient(1px 1px at 74% 40%, rgba(245,246,247,.25), transparent 60%);
+    background-repeat: repeat; background-size: 480px 480px;
+  }
+  main, .topbar { position: relative; z-index: 1; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 28px; border-bottom: 1px solid var(--panel-border);
+    position: sticky; top: 0; background: oklch(0.30 0.018 255 / 0.90); backdrop-filter: blur(8px);
+    z-index: 20;
+  }
+  .topbar-logo-link { text-decoration: none; display: inline-flex; align-items: center; }
+
+  /* Logo lockup — rings behind stacked initials/divider/fullname, per the brand
+     spec. --topbar sizes the whole composition to ~50% of the old separate
+     hero banner (rings were 380px there) so it fits compactly upper-left. */
+  .dsc-logo { position: relative; display: flex; flex-direction: column; align-items: center; }
+  .dsc-rings { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -54%);
+    width: 380px; max-width: 90vw; height: auto; }
+  .dsc-rings ellipse { fill: none; stroke: var(--accent-dim); }
+  .dsc-rings .ring-outer { stroke-width: 1.5; opacity: 0.9; }
+  .dsc-rings .ring-inner { stroke-width: 1; opacity: 0.55; }
+  .dsc-wordmark { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+  .dsc-initials { font-weight: 600; font-size: 64px; letter-spacing: .08em; color: var(--frame-fg); line-height: 1; }
+  .dsc-divider { width: 220px; max-width: 60vw; height: 2px; background: var(--accent); margin: 16px 0; }
+  .dsc-fullname { font-weight: 500; font-size: 14px; letter-spacing: .42em; text-transform: uppercase;
+    color: var(--frame-fg-dim); text-align: center; }
+
+  .dsc-logo--topbar { width: 190px; padding: 14px 0 10px; }
+  .dsc-logo--topbar .dsc-rings { width: 190px; }
+  .dsc-logo--topbar .dsc-initials { font-size: 32px; }
+  .dsc-logo--topbar .dsc-divider { width: 110px; height: 1px; margin: 8px 0; }
+  .dsc-logo--topbar .dsc-fullname { font-size: 9px; letter-spacing: .3em; }
+
+  nav.tabs { display: flex; gap: 4px; background: var(--panel-bg); border: 1px solid var(--panel-border);
+    border-radius: 999px; padding: 4px; }
+  nav.tabs a {
+    background: none; border: none; color: var(--subtext); font-family: var(--sans);
+    padding: 8px 18px; border-radius: 999px; cursor: pointer; font-size: 12px;
+    letter-spacing: .12em; text-transform: uppercase; font-weight: 600;
+    text-decoration: none; display: inline-block;
+  }
+  nav.tabs a.active { background: var(--accent); color: var(--frame-fg); }
+  nav.tabs a:not(.active):hover { color: var(--accent); }
+
+  main { max-width: 1400px; margin: 0 auto; padding: 22px 24px 60px; }
+
+  /* Mobile-first: single stacked column in original document order. */
+  .columns-desktop { display: none; }
+  .stack-mobile { display: block; }
+
+  /* Desktop: explicit 3-column layout, panels pre-distributed at build time
+     (greedy height balance) rather than relying on CSS column-count, which
+     forces one column to run long when a single panel is much taller than
+     the rest and leaves the other columns with a big blank gap. */
+  @media (min-width: 1080px) {
+    .stack-mobile { display: none; }
+    .columns-desktop { display: flex; gap: 22px; align-items: flex-start; }
+    .columns-desktop .col { flex: 1 1 0; min-width: 0; }
+  }
+
+  .panel {
+    background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 14px;
+    padding: 26px 28px; margin-bottom: 22px; position: relative; overflow: hidden;
+    color: var(--text); box-shadow: 0 2px 10px oklch(0.18 0.02 255 / 0.30);
+  }
+  .panel::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent 70%);
+  }
+
+  h1 { font-size: 15px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; margin: 0; color: var(--offwhite); }
+  h2 {
+    font-size: 13px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--offwhite); margin: 0 0 18px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--panel-border); display: flex; align-items: center; gap: 10px;
+  }
+  .panel:not(:first-child) h2 { margin-top: 0; }
+  h3 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 18px 0 8px; }
+  p { color: var(--text); font-size: 14.5px; font-weight: 400; line-height: 1.65; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--offwhite); font-weight: 600; }
+  em { color: var(--subtext); font-style: italic; }
+  a { color: var(--accent); }
+
+  .table-wrap { overflow-x: auto; margin: 4px 0 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--panel-border); }
+  th { color: var(--subtext); font-weight: 600; text-transform: uppercase; font-size: 10px;
+    letter-spacing: .1em; font-family: var(--mono); }
+  td { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: oklch(0.86 0.008 255); }
+
+  code { background: oklch(0.85 0.010 255); color: var(--text); padding: 2px 6px; border-radius: 4px;
+    font-family: var(--mono); font-size: 90%; }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 10px; font-size: 14.5px; font-weight: 400; line-height: 1.65; color: var(--text); }
+  li:last-child { margin-bottom: 0; }
+  hr { display: none; }
+
+  .status { display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-right: 6px; }
+  .status--active { color: var(--accent); background: rgba(110, 150, 200, 0.14); border: 1px solid var(--accent-dim); }
+  .status--dormant { color: var(--subtext); background: rgba(185,188,194,0.08); border: 1px solid var(--panel-border); }
+  .status--archived { color: #6a6d74; background: rgba(106,109,116,0.08); border: 1px solid var(--panel-border); }
+
+  /* Registry cards — category panels stack full width; cards flow responsively inside. */
+  .reg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  .reg-card { border: 1px solid var(--panel-border); border-radius: 12px; padding: 14px 15px;
+    background: oklch(0.96 0.003 255); color: var(--text); display: flex; flex-direction: column; }
+  .reg-card--ref { border-style: dashed; }
+  .reg-card--paused { opacity: 0.68; }
+  .reg-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+  .reg-card-title { font-weight: 600; font-size: 14px; color: var(--offwhite); line-height: 1.3; }
+  .reg-sys { font-family: var(--mono); font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--subtext); border: 1px solid var(--panel-border); border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+  .reg-desc { font-size: 13px; color: var(--text); opacity: 0.78; line-height: 1.5; margin-bottom: 12px; flex: 1; }
+  .reg-cad { align-self: flex-start; font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 999px; }
+  .reg-cad--scheduled { color: var(--accent); background: rgba(110,150,200,0.14); border: 1px solid var(--accent-dim); }
+  .reg-cad--asneeded { color: var(--subtext); background: rgba(245,246,247,0.05); border: 1px solid var(--panel-border); }
+  .reg-cad--paused { color: var(--subtext); background: rgba(245,246,247,0.06); border: 1px solid var(--panel-border); }
+  .reg-cad--planned { color: var(--subtext); background: none; border: 1px dashed var(--accent-dim); }
+
+  .footer-note { color: var(--frame-fg-dim); font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
+    margin-top: 30px; text-align: center; opacity: .7; }
+
+  /* Phone-specific tightening (Digest is the page most often checked on a phone). */
+  @media (max-width: 600px) {
+    .dsc-logo--topbar { width: 120px; padding: 8px 0; }
+    .dsc-logo--topbar .dsc-rings { width: 120px; }
+    .dsc-logo--topbar .dsc-initials { font-size: 22px; }
+    .dsc-logo--topbar .dsc-divider { display: none; }
+    .dsc-logo--topbar .dsc-fullname { display: none; }
+    .panel { padding: 18px 16px; margin-bottom: 16px; }
+    main { padding: 14px 14px 40px; }
+    h2 { font-size: 12px; letter-spacing: .14em; }
+    table, th, td { font-size: 11.5px; }
+    th, td { padding: 8px 8px; }
+    nav.tabs { gap: 2px; padding: 3px; }
+    nav.tabs a { padding: 7px 10px; font-size: 10px; letter-spacing: .06em; white-space: nowrap; }
+  }
+
+  .landing-links { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin-top: 30px; }
+  .landing-links a {
+    display: block; min-width: 200px; text-align: center; text-decoration: none;
+    background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 14px;
+    padding: 22px 30px; color: var(--offwhite); font-family: var(--mono); font-size: 12px;
+    letter-spacing: .14em; text-transform: uppercase; font-weight: 600; position: relative; overflow: hidden;
+  }
+  .landing-links a::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent 70%);
+  }
+  .landing-links a small { display: block; margin-top: 6px; color: var(--subtext); font-size: 10px; letter-spacing: .08em; text-transform: none; font-weight: 400; }
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="topbar-logo-link" href="dashboard.html"><div class="dsc-logo dsc-logo--topbar">
+  
+<svg class="dsc-rings" viewBox="0 0 400 200" aria-hidden="true">
+  <ellipse cx="200" cy="100" rx="162" ry="60" transform="rotate(-18 200 100)" class="ring-outer"/>
+  <ellipse cx="200" cy="100" rx="132" ry="45" transform="rotate(-18 200 100)" class="ring-inner"/>
+</svg>
+
+  <div class="dsc-wordmark">
+    <span class="dsc-initials">DSC</span>
+    <span class="dsc-divider"></span>
+    <span class="dsc-fullname">Dark Skies Consulting</span>
+  </div>
+</div></a>
+  <nav class="tabs">
+    <a href="registry.html" class="">Registry</a>
+    <a href="digest.html" class="">Digest</a>
+    <a href="stock-price.html" class="active">Stock-Price</a>
+    <a href="calendar.html">Calendar</a>
+  </nav>
+</header>
+
+<main>
+  <div class="panel"><h1>Stock-Price Tracker</h1>
+<p>Quick-look table of every <code>/stock-price</code> and <code>/stock-trim</code> skill run on file, read directly from each ticker&#x27;s <code>{TICKER}_Tape.md</code> journal in <code>Investing Project/</code> (and its <code>tactical briefs/</code> subfolder). Source tapes are the long-form narrative log; this table is a compressed pointer back to them, not a replacement — open the tape file for the full reasoning.</p>
+<p><strong>Update cadence:</strong> manual — run &quot;update the stock-price tracker&quot; in Claude Code. <strong>Rolling window:</strong> runs older than 30 days drop off automatically as stale. <strong>Last updated:</strong> 2026-07-10</p></div><div class="panel"><div class="table-wrap"><table>
+<thead><tr>
+<th>Ticker</th>
+<th>Date Run</th>
+<th>Skill</th>
+<th>Price</th>
+<th>Note</th>
+</tr></thead><tbody>
+<tr><td>ORCL</td><td>2026-07-02</td><td>Trim</td><td>$139.94 (trim)</td><td>Death cross confirmed active (not pending) — trim-for-safety verdict on a loss-cut basis, not profit-taking. Exit ladder: ~40% @ $151.20, ~30% @ $193.80, ~30% on 50D reclaim. Hard exit (actionable): weekly close below $134.57. Real position corrected same session: 103.538 sh @ $185.72 avg, taxable margin (Fidelity), 100% short-term lots. User&#x27;s bull thesis (irrational selloff, capital rotating to other AI-infra) logged, not argued against.</td></tr>
+<tr><td>ANET</td><td>2026-07-03</td><td>Trim</td><td>$159.99 (no trim signal)</td><td>NO TRIM SIGNAL — holding defensible. Golden cross intact, spread widening. RSI 48.6 neutral, never cleared 70 in trailing 20d. Range position ~79th percentile — not extended enough to trigger the top-of-range/RSI-rollover combo. Unrealized +$3,897 (+8.8%), all short-term.</td></tr>
+<tr><td>IDMO</td><td>2026-07-09</td><td>Price</td><td>$58.80 (entry)</td><td>Fresh-entry read, cleanest regime of the names checked that day — golden cross basically at spot, RSI neutral (49.3), no caution flags at all. POC/support $58.80 independently confirms Pat&#x27;s own manual 57–58 entry note almost to the dollar — recommended as the working GTC level. One of 7 confirmed names in the Roth $145K QUAL-hybrid sleeve.</td></tr>
+<tr><td>QQQM</td><td>2026-07-04</td><td>Price</td><td>$293.42 (no entry — chop zone)</td><td>Fresh-entry read. Golden cross intact, June dip was bought not sold into. But sitting at the top of the range under a resistance wall ($293.80/$296.72) with cooling RSI — classic &quot;NO-ADD CHOP&quot; zone. No add amount specified; informational only.</td></tr>
+<tr><td>QUAL</td><td>2026-07-06</td><td>Price</td><td>$216–221 base / $197–201 &amp; $190–196 up-size (entry)</td><td>Fresh-entry read, $17,400 to deploy. Bullish golden cross but rich — 96th percentile of 52wk range, one day off all-time high, RSI rolled over from 71.9. Engine fired trim-for-profit/don&#x27;t-chase. Zone-mapped, pullback-weighted DCA plan; blended avg ≈$202 if all 6 tranches fill. Kill switch: weekly close &lt; $181.55.</td></tr>
+<tr><td>SPMO</td><td>2026-07-09</td><td>Price</td><td>$153.80 starter / $148.29 full (entry)</td><td>Fresh-entry read, Roth $145K sleeve. Strong golden cross (200SMA +21.5%) — long-run trend running hot, not a fresh breakout. trim_for_profit fired on range-position math even with RSI neutral — cooling gently, not breaking down. POC/support sits almost exactly at spot; treat as starter-only given the 200SMA is still 21.5% below.</td></tr>
+<tr><td>VHT</td><td>2026-07-09 (also read 2026-07-06)</td><td>Price</td><td>$288.80 starter / $282.68 full (entry)</td><td>Golden cross intact and widening, but RSI (65.8) continuing to cool from a 75.0 peak flagged 7/6 — 3 sessions of flat price while momentum fades: a pause, not a breakdown, but not a green light either. trim_for_profit still firing (momentum waning at top of range) both reads. One of 7 confirmed Roth $145K sleeve names — no entry price on file before this, recommend the starter/full-add levels above.</td></tr>
+<tr><td>AVAV</td><td>2026-07-01</td><td>Price</td><td>$172.44 (no entry — wait)</td><td>Initial fresh-entry read. Death cross active, spread -30.8%, price at just 13% of the 52wk range post a sharp decline from $417.86. Neutral RSI + a post-earnings gap-up hint at early stabilization, but backtest confirms poor knife-catch expectancy (41% win historically) in this regime. Watch for a 50SMA reclaim as the actual &quot;go&quot; signal rather than acting on the dip alone.</td></tr>
+<tr><td>NASA</td><td>2026-07-01</td><td>Price</td><td>$29.45 (no entry — wait)</td><td>Fresh-entry brief, fund only ~3 months old (low-confidence technicals, no 200SMA yet). Round-tripped the entire May run-up back down following SpaceX&#x27;s June 12 IPO. Catalyst logged: SPCX joins Nasdaq-100 7/7 — modest indirect NAV tailwind via NASA&#x27;s locked-up pre-IPO SPV stake, but likely swamped by NASA&#x27;s &quot;only way to touch pre-IPO SpaceX&quot; scarcity premium evaporating now that SPCX trades freely. <strong>Dropped from Cowork&#x27;s daily-portfolio-email advisory scope entirely as of 2026-07-09</strong> — Pat tracks manually now.</td></tr>
+<tr><td>NVO</td><td>2026-07-02</td><td>Price</td><td>$48.77 (base tranche only, caution)</td><td>Fresh-entry evaluation. Active death cross, price rallied 39% off the 52wk low into a tight $48.8–$49.4 supply cluster (POC + trapped-long AVWAP stacked together). Two distinct 100M+-share volume-shock breakdown days in the trailing year — repeated negative catalysts, not a one-off. Verdict: CAUTION, base tranche only if entering at all; no confirmed reversal.</td></tr>
+</tbody></table></div></div><div class="panel"><h2>Notes</h2>
+<ul>
+<li>Two stale/superseded tape files exist at <code>Investing Project/stock-price/ORCL_Tape.md</code> and</li>
+</ul>
+<p><code>Investing Project/stock-price/QUAL_Tape.md</code> — these live inside the skill&#x27;s own install folder (alongside <code>SKILL.md</code>/<code>scripts/</code>) and predate the top-level tapes above (Jun 29–30 vs. the top-level files&#x27; Jul 2–6). Read as setup artifacts from when the skill was first installed, not live entries — excluded from this table. Flag if that assumption&#x27;s wrong.</p>
+<ul>
+<li>All runs found so far fall between 2026-07-01 and 2026-07-09 — everything is within the</li>
+</ul>
+<p>30-day window this first time through. Nothing has dropped off yet.</p></div>
+  <div class="footer-note">Rendered 2026-07-29 10:53 &middot; read-only view &mdash; nothing here triggers a script. Run "update the registry" / "run the morning digest" / "build the HTML dashboard" in Claude Code to refresh.</div>
+</main>
+</body>
+</html>
